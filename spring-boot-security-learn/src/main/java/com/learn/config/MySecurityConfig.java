@@ -1,5 +1,7 @@
 package com.learn.config;
 
+import com.learn.services.CustomUserDetailService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -16,6 +18,8 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class MySecurityConfig extends WebSecurityConfigurerAdapter{
+    @Autowired
+    private CustomUserDetailService customUserDetailService;
     @Override
     protected void configure (HttpSecurity http) throws Exception {
         http
@@ -41,11 +45,10 @@ public class MySecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser("john").password(this.passwordEncoder().encode("durgesh")).roles("NORMAL");
-        auth.inMemoryAuthentication().withUser("kabir").password(this.passwordEncoder().encode("preeti")).roles("ADMIN");
-    }
+        auth.userDetailsService(customUserDetailService).passwordEncoder(passwordEncoder());
+            }
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder(){
         //return NoOpPasswordEncoder.getInstance(); // no encoding used here to encrypt password
         return new BCryptPasswordEncoder(10);
     }
